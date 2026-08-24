@@ -4,7 +4,7 @@ import {
   X
 } from 'lucide-react';
 
-const BRAND_LOGO_URL = 'https://lh3.googleusercontent.com/d/1gQMlBBFY5dk_AMCfi2PbHa9GfUyIRb1o';
+const BRAND_LOGO_URL = 'https://lh3.googleusercontent.com/d/16lxsmy7lYeNfBEqh7-lhHvtPM6gbdeBz';
 
 interface NavbarProps {
   onOpenSubscribe?: (planId?: string) => void;
