@@ -1,0 +1,8 @@
+{
+  "name": "OFFICIAL: FiberX ISP Landing Page v1",
+  "description": "A modern, high-converting landing page for an ultra-fast Fiber Internet Service Provider (ISP) featuring speed tiers, coverage checking, interactive lead forms, plan selection, and FAQ accordions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
