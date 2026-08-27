@@ -91,7 +91,7 @@ export const CoverageModal: React.FC<CoverageModalProps> = ({
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="e.g. 742 Evergreen Terrace or Zip 90210"
+                  placeholder="e.g. Bonifacio Global City, Taguig or Zip 1634"
                   className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all"
                 />
               </div>

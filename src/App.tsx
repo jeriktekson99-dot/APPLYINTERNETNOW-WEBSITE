@@ -7,28 +7,17 @@ import { WhyChooseUs } from './components/WhyChooseUs';
 import { FaqSection } from './components/FaqSection';
 import { CtaBanner } from './components/CtaBanner';
 import { Footer } from './components/Footer';
-import { SubscribeModal } from './components/SubscribeModal';
 import { CoverageModal } from './components/CoverageModal';
 import { SpeedTestModal } from './components/SpeedTestModal';
 import { WhyUsModal } from './components/WhyUsModal';
 import { LeadFormData, Plan } from './types';
-import { CheckCircle2, Sparkles, X } from 'lucide-react';
 
 export default function App() {
-  // Modal states
-  const [subscribeModalOpen, setSubscribeModalOpen] = useState(false);
+  // Modal & Selection states
   const [selectedPlanId, setSelectedPlanId] = useState('plan-1500');
   const [coverageModalOpen, setCoverageModalOpen] = useState(false);
   const [speedTestModalOpen, setSpeedTestModalOpen] = useState(false);
   const [whyUsModalOpen, setWhyUsModalOpen] = useState(false);
-  
-  // Toast notification
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 5000);
-  };
 
   const scrollToHeroForm = (planId?: string) => {
     if (planId) {
@@ -57,37 +46,11 @@ export default function App() {
   };
 
   const handleHeroFormSubmitted = (data: LeadFormData) => {
-    showToast(`🎉 Thank you, ${data.fullName}! Your FiberX application has been received. Our team will contact you shortly.`);
-    // Open confirmation modal
-    setSelectedPlanId(data.selectedPlanId);
-    setSubscribeModalOpen(true);
-  };
-
-  const handleSubscribeModalSuccess = (data: LeadFormData) => {
-    showToast(`✅ Application logged for ${data.fullName}! Check your phone for technician arrival updates.`);
+    // Handled in-place within the form
   };
 
   return (
     <div className="min-h-screen bg-white text-slate-900 flex flex-col selection:bg-cyan-300 selection:text-slate-950 font-sans">
-      
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed top-20 right-4 z-50 max-w-md bg-[#140830] text-white p-4 rounded-2xl shadow-2xl border border-cyan-400/40 flex items-start gap-3 animate-in slide-in-from-top-4 duration-300">
-          <div className="w-7 h-7 rounded-full bg-cyan-500/20 text-[#00F0FF] flex items-center justify-center shrink-0 mt-0.5">
-            <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
-          </div>
-          <div className="flex-1 text-xs font-medium leading-relaxed">
-            {toastMessage}
-          </div>
-          <button
-            onClick={() => setToastMessage(null)}
-            className="text-slate-400 hover:text-white p-1"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
-
       {/* Navigation Bar */}
       <Navbar
         onOpenSubscribe={handleOpenSubscribe}
@@ -130,14 +93,7 @@ export default function App() {
         onOpenSubscribe={() => scrollToHeroForm()}
       />
 
-      {/* Interactive Modals */}
-      <SubscribeModal
-        isOpen={subscribeModalOpen}
-        onClose={() => setSubscribeModalOpen(false)}
-        selectedPlanId={selectedPlanId}
-        onSuccess={handleSubscribeModalSuccess}
-      />
-
+      {/* Modals */}
       <CoverageModal
         isOpen={coverageModalOpen}
         onClose={() => setCoverageModalOpen(false)}

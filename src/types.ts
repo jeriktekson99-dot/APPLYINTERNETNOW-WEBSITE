@@ -32,6 +32,7 @@ export interface LeadFormData {
   selectedPlanId: string;
   serviceType: 'home' | 'business';
   promoCode?: string;
+  ticketNumber?: string;
 }
 
 export interface FAQItem {

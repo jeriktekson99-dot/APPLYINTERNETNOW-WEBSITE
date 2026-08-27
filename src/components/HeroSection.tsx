@@ -7,7 +7,10 @@ import {
   Phone, 
   Mail, 
   CheckCircle2, 
-  ChevronDown
+  ChevronDown,
+  Check,
+  Home,
+  RotateCcw
 } from 'lucide-react';
 import { LeadFormData } from '../types';
 import familyLifestyleImg from '../assets/images/family_smart_tech_1787070015425.jpg';
@@ -43,7 +46,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   }, [selectedPlanId]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
+
+  React.useEffect(() => {
+    if (selectedPlanId) {
+      setFormData((prev) => ({ ...prev, selectedPlanId }));
+      setIsSubmitted(false);
+    }
+  }, [selectedPlanId]);
 
   const speedOptions = [
     { id: 'plan-1250', name: 'PLAN 1250', speed: 'Up to 100 Mbps', price: '₱1,250/mo' },
@@ -84,10 +95,37 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     setIsSubmitting(true);
     setTimeout(() => {
       setIsSubmitting(false);
+      setIsSubmitted(true);
       if (onFormSubmitted) {
         onFormSubmitted(formData);
       }
     }, 600);
+  };
+
+  const handleResetForm = () => {
+    setFormData({
+      fullName: '',
+      mobileNumber: '',
+      email: '',
+      installationAddress: '',
+      selectedPlanId: selectedPlanId || 'plan-1500',
+      serviceType: 'home',
+    });
+    setFormErrors({});
+    setIsSubmitted(false);
+  };
+
+  const handleReturn = () => {
+    setFormData({
+      fullName: '',
+      mobileNumber: '',
+      email: '',
+      installationAddress: '',
+      selectedPlanId: selectedPlanId || 'plan-1500',
+      serviceType: 'home',
+    });
+    setFormErrors({});
+    setIsSubmitted(false);
   };
 
   const handleGetStarted = () => {
@@ -158,16 +196,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
             {/* CTA Button Group */}
             <div className="flex flex-wrap items-center gap-4 pt-2">
-              {/* Solid-colored 'Get Started' button with rounded corners and white text */}
-              <button
-                type="button"
-                id="hero-get-started-btn"
-                onClick={handleGetStarted}
+              {/* Solid-colored 'Contact Now' button leading to Facebook Messenger */}
+              <a
+                href="https://m.me/105613195973260"
+                target="_blank"
+                rel="noopener noreferrer"
+                id="hero-contact-now-btn"
                 className="bg-[#2A4BFF] hover:bg-[#1E3BB8] text-white font-bold text-base px-8 py-4 rounded-2xl shadow-md hover:shadow-lg shadow-black/20 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer flex items-center gap-2.5"
               >
-                <span>Get Started</span>
+                <span>Contact Now</span>
                 <ArrowRight className="w-4 h-4" />
-              </button>
+              </a>
 
               <button
                 type="button"
@@ -197,174 +236,228 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </div>
           </div>
 
-          {/* Right Side: Apply Now Form Card */}
+          {/* Right Side: Apply Now Form Card / In-Place Thank You View */}
           <div className="lg:col-span-6 relative scroll-mt-28" id="hero-apply-form">
-            {/* Form Container */}
-            <div className="relative z-10 bg-[#160836] rounded-3xl p-6 sm:p-8 shadow-xl border border-violet-800/60 text-white">
+            {/* Form Container with fixed consistent dimensions */}
+            <div className="relative z-10 bg-[#160836] rounded-3xl p-6 sm:p-8 shadow-xl border border-violet-800/60 text-white min-h-[530px] flex flex-col justify-between">
               
-              {/* Form Header */}
-              <div className="pb-3 mb-5 border-b border-white/10">
-                <h2 className="font-display text-2xl sm:text-3xl font-black text-white tracking-tight">
-                  Apply Now
-                </h2>
-              </div>
-
-              {/* Form Body */}
-              <form onSubmit={handleSubmit} className="space-y-4">
-                
-                {/* 1. Choose Plan */}
-                <div>
-                  <label htmlFor="hero-choose-plan" className="block text-xs font-bold uppercase tracking-wider text-purple-200 mb-1.5">
-                    Choose Plan <span className="text-purple-300">*</span>
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-purple-300">
-                      <Zap className="w-4 h-4" />
+              {isSubmitted ? (
+                /* In-Place Thank You Confirmation (Matches exact size of Apply Now form) */
+                <div className="flex flex-col items-center justify-center text-center h-full flex-1 py-4 my-auto animate-in fade-in zoom-in-95 duration-300">
+                  
+                  {/* Concentric Glow Circle Icon */}
+                  <div className="w-20 h-20 rounded-full border-2 border-[#00E599] flex items-center justify-center mb-5 shadow-[0_0_35px_rgba(0,229,153,0.35)]">
+                    <div className="w-12 h-12 rounded-full bg-[#00E599] flex items-center justify-center text-[#160836]">
+                      <Check className="w-7 h-7 stroke-[3.5]" />
                     </div>
-                    <select
-                      id="hero-choose-plan"
-                      name="selectedPlanId"
-                      value={formData.selectedPlanId}
-                      onChange={handleInputChange}
-                      className="w-full pl-10 pr-10 py-3 bg-black/45 border border-white/20 rounded-xl text-sm text-white font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400 transition-all appearance-none cursor-pointer"
+                  </div>
+
+                  {/* Pill Badge */}
+                  <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-[#053225]/90 border border-[#00E599]/50 text-[#00E599] text-xs font-black tracking-wider uppercase mb-3.5 shadow-xs">
+                    APPLICATION RECEIVED SUCCESSFULLY
+                  </div>
+
+                  {/* Headline */}
+                  <h2 className="font-display text-2xl sm:text-3xl lg:text-[32px] font-black text-white tracking-tight mb-2.5">
+                    Thank You for Submitting!
+                  </h2>
+
+                  {/* Subtitle */}
+                  <p className="text-purple-200/90 text-sm sm:text-base max-w-md mx-auto leading-relaxed mb-6">
+                    Your FiberX internet application has been registered. Our deployment team is reviewing port availability at your location.
+                  </p>
+
+                  {/* Actions Block directly below description with no divider line */}
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full max-w-md">
+                    <button
+                      type="button"
+                      id="thankyou-return-btn"
+                      onClick={handleReturn}
+                      className="w-full sm:flex-1 py-3.5 px-5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-sm text-center flex items-center justify-center gap-2 transition-all cursor-pointer"
                     >
-                      {speedOptions.map((item) => (
-                        <option key={item.id} value={item.id} className="bg-[#170933] text-white">
-                          {item.name} ({item.speed}) — {item.price}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-purple-300">
-                      <ChevronDown className="w-4 h-4" />
-                    </div>
-                  </div>
-                </div>
+                      <Home className="w-4 h-4" />
+                      <span>Return</span>
+                    </button>
 
-                {/* 2. Full Name */}
-                <div>
-                  <label htmlFor="hero-full-name" className="block text-xs font-bold uppercase tracking-wider text-purple-200 mb-1.5">
-                    Full Name <span className="text-[#00F0FF]">*</span>
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-purple-300">
-                      <User className="w-4 h-4" />
-                    </div>
-                    <input
-                      type="text"
-                      id="hero-full-name"
-                      name="fullName"
-                      placeholder="e.g. Alex Henderson"
-                      value={formData.fullName}
-                      onChange={handleInputChange}
-                      className={`w-full pl-10 pr-3.5 py-2.5 bg-black/35 border rounded-xl text-sm text-white placeholder:text-purple-300/50 font-medium focus:outline-none focus:ring-2 transition-all ${
-                        formErrors.fullName ? 'border-rose-400 focus:ring-rose-400/30' : 'border-white/15 focus:border-blue-400 focus:ring-blue-500/30'
-                      }`}
-                    />
+                    <button
+                      type="button"
+                      id="thankyou-another-form-btn"
+                      onClick={handleResetForm}
+                      className="w-full sm:flex-1 py-3.5 px-5 rounded-xl bg-[#2A4BFF] hover:bg-[#1E3BB8] text-white font-extrabold text-sm text-center flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      <span>Answer Another Form</span>
+                    </button>
                   </div>
-                  {formErrors.fullName && (
-                    <p className="text-[11px] text-rose-300 font-medium mt-1">{formErrors.fullName}</p>
-                  )}
-                </div>
 
-                {/* 3 & 4. Email and Phone */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                  <div>
-                    <label htmlFor="hero-email" className="block text-xs font-bold uppercase tracking-wider text-purple-200 mb-1.5">
-                      Email <span className="text-[#00F0FF]">*</span>
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-purple-300">
-                        <Mail className="w-4 h-4" />
+                </div>
+              ) : (
+                /* Apply Now Form Body */
+                <div className="flex flex-col justify-between h-full">
+                  {/* Form Header */}
+                  <div className="pb-3 mb-5 border-b border-white/10">
+                    <h2 className="font-display text-2xl sm:text-3xl font-black text-white tracking-tight">
+                      Apply Now
+                    </h2>
+                  </div>
+
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    
+                    {/* 1. Choose Plan */}
+                    <div>
+                      <label htmlFor="hero-choose-plan" className="block text-xs font-bold uppercase tracking-wider text-purple-200 mb-1.5">
+                        Choose Plan <span className="text-purple-300">*</span>
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-purple-300">
+                          <Zap className="w-4 h-4" />
+                        </div>
+                        <select
+                          id="hero-choose-plan"
+                          name="selectedPlanId"
+                          value={formData.selectedPlanId}
+                          onChange={handleInputChange}
+                          className="w-full pl-10 pr-10 py-3 bg-black/45 border border-white/20 rounded-xl text-sm text-white font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400 transition-all appearance-none cursor-pointer"
+                        >
+                          {speedOptions.map((item) => (
+                            <option key={item.id} value={item.id} className="bg-[#170933] text-white">
+                              {item.name} ({item.speed}) — {item.price}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-purple-300">
+                          <ChevronDown className="w-4 h-4" />
+                        </div>
                       </div>
-                      <input
-                        type="email"
-                        id="hero-email"
-                        name="email"
-                        placeholder="alex@example.com"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        className={`w-full pl-10 pr-3.5 py-2.5 bg-black/35 border rounded-xl text-sm text-white placeholder:text-purple-300/50 font-medium focus:outline-none focus:ring-2 transition-all ${
-                          formErrors.email ? 'border-rose-400 focus:ring-rose-400/30' : 'border-white/15 focus:border-blue-400 focus:ring-blue-500/30'
-                        }`}
-                      />
                     </div>
-                    {formErrors.email && (
-                      <p className="text-[11px] text-rose-300 font-medium mt-1">{formErrors.email}</p>
-                    )}
-                  </div>
 
-                  <div>
-                    <label htmlFor="hero-phone" className="block text-xs font-bold uppercase tracking-wider text-purple-200 mb-1.5">
-                      Phone <span className="text-[#00F0FF]">*</span>
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-purple-300">
-                        <Phone className="w-4 h-4" />
+                    {/* 2. Full Name */}
+                    <div>
+                      <label htmlFor="hero-full-name" className="block text-xs font-bold uppercase tracking-wider text-purple-200 mb-1.5">
+                        Full Name <span className="text-[#00F0FF]">*</span>
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-purple-300">
+                          <User className="w-4 h-4" />
+                        </div>
+                        <input
+                          type="text"
+                          id="hero-full-name"
+                          name="fullName"
+                          placeholder="e.g. Juan dela Cruz"
+                          value={formData.fullName}
+                          onChange={handleInputChange}
+                          className={`w-full pl-10 pr-3.5 py-2.5 bg-black/35 border rounded-xl text-sm text-white placeholder:text-purple-300/50 font-medium focus:outline-none focus:ring-2 transition-all ${
+                            formErrors.fullName ? 'border-rose-400 focus:ring-rose-400/30' : 'border-white/15 focus:border-blue-400 focus:ring-blue-500/30'
+                          }`}
+                        />
                       </div>
-                      <input
-                        type="tel"
-                        id="hero-phone"
-                        name="mobileNumber"
-                        placeholder="+1 (555) 019-2834"
-                        value={formData.mobileNumber}
-                        onChange={handleInputChange}
-                        className={`w-full pl-10 pr-3.5 py-2.5 bg-black/35 border rounded-xl text-sm text-white placeholder:text-purple-300/50 font-medium focus:outline-none focus:ring-2 transition-all ${
-                          formErrors.mobileNumber ? 'border-rose-400 focus:ring-rose-400/30' : 'border-white/15 focus:border-blue-400 focus:ring-blue-500/30'
-                        }`}
-                      />
+                      {formErrors.fullName && (
+                        <p className="text-[11px] text-rose-300 font-medium mt-1">{formErrors.fullName}</p>
+                      )}
                     </div>
-                    {formErrors.mobileNumber && (
-                      <p className="text-[11px] text-rose-300 font-medium mt-1">{formErrors.mobileNumber}</p>
-                    )}
-                  </div>
-                </div>
 
-                {/* 5. Address */}
-                <div>
-                  <label htmlFor="hero-address" className="block text-xs font-bold uppercase tracking-wider text-purple-200 mb-1.5">
-                    Address <span className="text-[#00F0FF]">*</span>
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-purple-300">
-                      <MapPin className="w-4 h-4" />
+                    {/* 3 & 4. Email and Phone */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                      <div>
+                        <label htmlFor="hero-email" className="block text-xs font-bold uppercase tracking-wider text-purple-200 mb-1.5">
+                          Email <span className="text-[#00F0FF]">*</span>
+                        </label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-purple-300">
+                            <Mail className="w-4 h-4" />
+                          </div>
+                          <input
+                            type="email"
+                            id="hero-email"
+                            name="email"
+                            placeholder="juan.delacruz@gmail.com"
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            className={`w-full pl-10 pr-3.5 py-2.5 bg-black/35 border rounded-xl text-sm text-white placeholder:text-purple-300/50 font-medium focus:outline-none focus:ring-2 transition-all ${
+                              formErrors.email ? 'border-rose-400 focus:ring-rose-400/30' : 'border-white/15 focus:border-blue-400 focus:ring-blue-500/30'
+                            }`}
+                          />
+                        </div>
+                        {formErrors.email && (
+                          <p className="text-[11px] text-rose-300 font-medium mt-1">{formErrors.email}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label htmlFor="hero-phone" className="block text-xs font-bold uppercase tracking-wider text-purple-200 mb-1.5">
+                          Phone <span className="text-[#00F0FF]">*</span>
+                        </label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-purple-300">
+                            <Phone className="w-4 h-4" />
+                          </div>
+                          <input
+                            type="tel"
+                            id="hero-phone"
+                            name="mobileNumber"
+                            placeholder="+63 917 123 4567"
+                            value={formData.mobileNumber}
+                            onChange={handleInputChange}
+                            className={`w-full pl-10 pr-3.5 py-2.5 bg-black/35 border rounded-xl text-sm text-white placeholder:text-purple-300/50 font-medium focus:outline-none focus:ring-2 transition-all ${
+                              formErrors.mobileNumber ? 'border-rose-400 focus:ring-rose-400/30' : 'border-white/15 focus:border-blue-400 focus:ring-blue-500/30'
+                            }`}
+                          />
+                        </div>
+                        {formErrors.mobileNumber && (
+                          <p className="text-[11px] text-rose-300 font-medium mt-1">{formErrors.mobileNumber}</p>
+                        )}
+                      </div>
                     </div>
-                    <input
-                      type="text"
-                      id="hero-address"
-                      name="installationAddress"
-                      placeholder="Unit 14B, 742 Evergreen Terrace, Springfield"
-                      value={formData.installationAddress}
-                      onChange={handleInputChange}
-                      className={`w-full pl-10 pr-3.5 py-2.5 bg-black/35 border rounded-xl text-sm text-white placeholder:text-purple-300/50 font-medium focus:outline-none focus:ring-2 transition-all ${
-                        formErrors.installationAddress ? 'border-rose-400 focus:ring-rose-400/30' : 'border-white/15 focus:border-blue-400 focus:ring-blue-500/30'
-                      }`}
-                    />
-                  </div>
-                  {formErrors.installationAddress && (
-                    <p className="text-[11px] text-rose-300 font-medium mt-1">{formErrors.installationAddress}</p>
-                  )}
-                </div>
 
-                {/* Submit Action Button */}
-                <button
-                  type="submit"
-                  id="hero-form-submit-btn"
-                  disabled={isSubmitting}
-                  className="w-full mt-2 bg-[#2A4BFF] hover:bg-[#1E3BB8] active:scale-[0.99] text-white font-extrabold text-base py-3.5 px-6 rounded-xl shadow-md hover:shadow-lg shadow-black/20 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75"
-                >
-                  {isSubmitting ? (
-                    <span className="flex items-center gap-2">
-                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Processing Application...</span>
-                    </span>
-                  ) : (
-                    <>
-                      <span>Apply Now</span>
-                      <ArrowRight className="w-5 h-5 stroke-[2.5]" />
-                    </>
-                  )}
-                </button>
-              </form>
+                    {/* 5. Address */}
+                    <div>
+                      <label htmlFor="hero-address" className="block text-xs font-bold uppercase tracking-wider text-purple-200 mb-1.5">
+                        Address <span className="text-[#00F0FF]">*</span>
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-purple-300">
+                          <MapPin className="w-4 h-4" />
+                        </div>
+                        <input
+                          type="text"
+                          id="hero-address"
+                          name="installationAddress"
+                          placeholder="Unit 14B, Tower 2, Bonifacio Global City, Taguig"
+                          value={formData.installationAddress}
+                          onChange={handleInputChange}
+                          className={`w-full pl-10 pr-3.5 py-2.5 bg-black/35 border rounded-xl text-sm text-white placeholder:text-purple-300/50 font-medium focus:outline-none focus:ring-2 transition-all ${
+                            formErrors.installationAddress ? 'border-rose-400 focus:ring-rose-400/30' : 'border-white/15 focus:border-blue-400 focus:ring-blue-500/30'
+                          }`}
+                        />
+                      </div>
+                      {formErrors.installationAddress && (
+                        <p className="text-[11px] text-rose-300 font-medium mt-1">{formErrors.installationAddress}</p>
+                      )}
+                    </div>
+
+                    {/* Submit Action Button */}
+                    <button
+                      type="submit"
+                      id="hero-form-submit-btn"
+                      disabled={isSubmitting}
+                      className="w-full mt-2 bg-[#2A4BFF] hover:bg-[#1E3BB8] active:scale-[0.99] text-white font-extrabold text-base py-3.5 px-6 rounded-xl shadow-md hover:shadow-lg shadow-black/20 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75"
+                    >
+                      {isSubmitting ? (
+                        <span className="flex items-center gap-2">
+                          <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>Processing Application...</span>
+                        </span>
+                      ) : (
+                        <>
+                          <span>Apply Now</span>
+                          <ArrowRight className="w-5 h-5 stroke-[2.5]" />
+                        </>
+                      )}
+                    </button>
+                  </form>
+                </div>
+              )}
 
             </div>
           </div>
