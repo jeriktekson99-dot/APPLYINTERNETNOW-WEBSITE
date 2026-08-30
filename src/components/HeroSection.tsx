@@ -13,6 +13,7 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { LeadFormData } from '../types';
+import { submitLeadApplication } from '../lib/supabase';
 import familyLifestyleImg from '../assets/images/family_smart_tech_1787070015425.jpg';
 
 interface HeroSectionProps {
@@ -89,17 +90,23 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     return Object.keys(errors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
     setIsSubmitting(true);
-    setTimeout(() => {
+
+    try {
+      const result = await submitLeadApplication(formData);
       setIsSubmitting(false);
       setIsSubmitted(true);
       if (onFormSubmitted) {
-        onFormSubmitted(formData);
+        onFormSubmitted({ ...formData, ticketNumber: result.referenceCode });
       }
-    }, 600);
+    } catch (err) {
+      console.error('Submission error:', err);
+      setIsSubmitting(false);
+      setIsSubmitted(true);
+    }
   };
 
   const handleResetForm = () => {
