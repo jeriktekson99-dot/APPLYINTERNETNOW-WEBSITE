@@ -161,9 +161,10 @@ ON CONFLICT (id) DO UPDATE SET
 -- ==============================================================================
 -- 7. HELPER VIEW FOR DASHBOARD REPORTING (applications_summary)
 -- ==============================================================================
--- Note: In Postgres 15+, views can query tables with RLS.
--- This view consolidates customer applications with plan specifications.
-CREATE OR REPLACE VIEW public.applications_summary 
+-- Note: In Postgres, replacing an existing view with different column positions requires DROP VIEW first.
+DROP VIEW IF EXISTS public.applications_summary CASCADE;
+
+CREATE VIEW public.applications_summary 
 WITH (security_invoker = false) -- Runs with creator privileges so summary is readable
 AS
 SELECT 
