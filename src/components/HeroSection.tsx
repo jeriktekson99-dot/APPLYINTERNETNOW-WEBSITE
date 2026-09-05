@@ -11,13 +11,10 @@ import {
   Check,
   Home,
   RotateCcw,
-  AlertTriangle,
-  Database,
-  Copy,
-  CheckCheck
+  AlertTriangle
 } from 'lucide-react';
 import { LeadFormData } from '../types';
-import { submitLeadApplication, ApplicationSubmissionResult } from '../lib/supabase';
+import { submitLeadApplication } from '../lib/supabase';
 import { CAVITE_LOCATIONS } from '../data/ispData';
 import familyLifestyleImg from '../assets/images/family_smart_tech_1787070015425.jpg';
 
@@ -54,8 +51,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [submissionResult, setSubmissionResult] = useState<ApplicationSubmissionResult | null>(null);
-  const [copiedSql, setCopiedSql] = useState(false);
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
 
   React.useEffect(() => {
@@ -110,7 +105,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
     try {
       const result = await submitLeadApplication(formData);
-      setSubmissionResult(result);
       setIsSubmitting(false);
       setIsSubmitted(true);
       if (onFormSubmitted) {
@@ -118,12 +112,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       }
     } catch (err: any) {
       console.error('Submission error:', err);
-      setSubmissionResult({
-        success: true,
-        referenceCode: formData.ticketNumber || 'FX-PENDING',
-        error: err?.message || 'Submission error',
-        source: 'local'
-      });
       setIsSubmitting(false);
       setIsSubmitted(true);
     }
@@ -140,7 +128,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       caviteLocation: '',
     });
     setFormErrors({});
-    setSubmissionResult(null);
     setIsSubmitted(false);
   };
 
@@ -155,7 +142,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       caviteLocation: '',
     });
     setFormErrors({});
-    setSubmissionResult(null);
     setIsSubmitted(false);
   };
 
@@ -294,62 +280,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   </h2>
 
                   {/* Subtitle */}
-                  <p className="text-purple-200/90 text-sm sm:text-base max-w-md mx-auto leading-relaxed mb-4">
+                  <p className="text-purple-200/90 text-sm sm:text-base max-w-md mx-auto leading-relaxed mb-6">
                     Your FiberX internet application has been registered. Our deployment team is reviewing optical port availability in {formData.caviteLocation ? `${formData.caviteLocation}, Cavite` : 'your area'}.
                   </p>
-
-                  {/* Reference Ticket & Supabase RLS Status */}
-                  <div className="w-full max-w-md bg-black/30 border border-white/10 rounded-2xl p-3.5 mb-5 text-left text-xs">
-                    <div className="flex items-center justify-between gap-2 mb-1.5">
-                      <span className="text-purple-300 font-semibold uppercase tracking-wider text-[11px]">Tracking Reference:</span>
-                      <span className="font-mono font-bold text-[#00F0FF] bg-[#00F0FF]/10 px-2.5 py-0.5 rounded-md text-xs border border-[#00F0FF]/30">
-                        {submissionResult?.referenceCode || formData.ticketNumber || 'FX-PENDING'}
-                      </span>
-                    </div>
-
-                    {submissionResult?.source === 'supabase' ? (
-                      <div className="flex items-center gap-1.5 text-emerald-300 font-medium text-[11px] pt-1.5 border-t border-white/10">
-                        <Database className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                        <span>Successfully saved to Supabase live database.</span>
-                      </div>
-                    ) : submissionResult?.error ? (
-                      <div className="pt-2 border-t border-white/10">
-                        <div className="flex items-start gap-1.5 text-amber-300 text-[11px] font-medium mb-1.5">
-                          <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
-                          <span>Supabase rejected submission: {submissionResult.error}</span>
-                        </div>
-                        <p className="text-[10px] text-purple-200/80 mb-2">
-                          Row Level Security (RLS) is blocking inserts. Click below to copy the SQL policy to paste into your Supabase SQL Editor:
-                        </p>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const sql = `ALTER TABLE public.applications ENABLE ROW LEVEL SECURITY;\nGRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;\nGRANT ALL ON TABLE public.applications TO anon, authenticated, service_role;\nCREATE POLICY "Anyone can submit application" ON public.applications FOR INSERT TO anon, authenticated WITH CHECK (true);\nCREATE POLICY "Anyone can view applications" ON public.applications FOR SELECT TO anon, authenticated USING (true);\nDROP VIEW IF EXISTS public.applications_summary CASCADE;\nCREATE OR REPLACE VIEW public.applications_summary WITH (security_invoker = false) AS SELECT a.id, a.reference_code, a.full_name, a.email, a.phone, a.address, a.plan_name, a.service_type, a.status, p.speed_mbps, p.price_php, a.created_at, a.cavite_location FROM public.applications a LEFT JOIN public.plans p ON a.plan_id = p.id ORDER BY a.created_at DESC;\nGRANT SELECT ON public.applications_summary TO anon, authenticated, service_role;`;
-                            navigator.clipboard.writeText(sql);
-                            setCopiedSql(true);
-                            setTimeout(() => setCopiedSql(false), 3000);
-                          }}
-                          className="w-full py-1.5 px-2.5 rounded-lg bg-white/10 hover:bg-white/15 text-purple-200 hover:text-white flex items-center justify-between text-[11px] font-mono transition-colors cursor-pointer"
-                        >
-                          <span className="truncate text-left text-[11px] font-medium">Copy Supabase RLS Fix SQL</span>
-                          {copiedSql ? (
-                            <span className="text-emerald-400 flex items-center gap-1 text-[11px] shrink-0 font-sans font-semibold">
-                              <CheckCheck className="w-3.5 h-3.5" /> Copied!
-                            </span>
-                          ) : (
-                            <span className="text-[#00F0FF] flex items-center gap-1 text-[11px] shrink-0 font-sans font-semibold">
-                              <Copy className="w-3.5 h-3.5" /> Copy SQL
-                            </span>
-                          )}
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1.5 text-purple-300 text-[11px] pt-1.5 border-t border-white/10">
-                        <Database className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                        <span>Saved to local session (Supabase not configured in .env).</span>
-                      </div>
-                    )}
-                  </div>
 
                   {/* Actions Block directly below description with no divider line */}
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full max-w-md">
