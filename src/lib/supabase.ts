@@ -76,43 +76,84 @@ export async function submitLeadApplication(
 
   if (client) {
     try {
-      const { data, error } = await client
-        .from('applications')
-        .insert([
-          {
-            reference_code: referenceCode,
-            plan_id: formData.selectedPlanId,
-            plan_name: planName,
-            service_type: formData.serviceType || 'home',
-            full_name: formData.fullName.trim(),
-            email: formData.email.trim().toLowerCase(),
-            phone: formData.mobileNumber.trim(),
-            cavite_location: formData.caviteLocation || null,
-            address: formData.caviteLocation 
-              ? `${formData.installationAddress.trim()} (${formData.caviteLocation}, Cavite)`
-              : formData.installationAddress.trim(),
-            status: 'pending',
-            promo_code: formData.promoCode || null,
-          },
-        ])
-        .select()
-        .single();
+      const formattedAddress = formData.caviteLocation 
+        ? `${formData.installationAddress.trim()} (${formData.caviteLocation}, Cavite)`
+        : formData.installationAddress.trim();
 
-      if (error) {
-        console.warn('Supabase insertion error, falling back to local storage:', error.message);
+      const basePayload: Record<string, any> = {
+        reference_code: referenceCode,
+        plan_id: formData.selectedPlanId,
+        plan_name: planName,
+        service_type: formData.serviceType || 'home',
+        full_name: formData.fullName.trim(),
+        email: formData.email.trim().toLowerCase(),
+        phone: formData.mobileNumber.trim(),
+        address: formattedAddress,
+        status: 'pending',
+        promo_code: formData.promoCode || null,
+      };
+
+      const payloadWithLocation = {
+        ...basePayload,
+        cavite_location: formData.caviteLocation || null,
+      };
+
+      // 1. Primary insert attempt with cavite_location.
+      // NOTE: We do NOT force `.select()` because if the table's RLS policy allows INSERT
+      // but lacks a matching SELECT policy for 'anon', chaining `.select()` causes Postgres
+      // to evaluate SELECT RLS and reject the entire insert transaction!
+      let insertResult = await client
+        .from('applications')
+        .insert([payloadWithLocation]);
+
+      // 2. If it fails because 'cavite_location' column is missing on an existing table:
+      if (
+        insertResult.error &&
+        (insertResult.error.message?.includes('cavite_location') ||
+          insertResult.error.message?.toLowerCase().includes('column'))
+      ) {
+        console.warn('Retrying insert without cavite_location column (schema mismatch)...');
+        insertResult = await client
+          .from('applications')
+          .insert([basePayload]);
+      }
+
+      if (insertResult.error) {
+        console.error(
+          `%c[Supabase RLS Error] Failed to insert application into 'applications' table:`,
+          'color: #ef4444; font-weight: bold; font-size: 14px;',
+          insertResult.error.message
+        );
+        console.info(
+          `%c👉 To fix Row Level Security (RLS) in your Supabase project:\n` +
+          `1. Open Supabase Dashboard -> SQL Editor\n` +
+          `2. Paste and Run the following SQL:\n\n` +
+          `ALTER TABLE public.applications ENABLE ROW LEVEL SECURITY;\n` +
+          `GRANT USAGE ON SCHEMA public TO anon, authenticated;\n` +
+          `GRANT ALL ON TABLE public.applications TO anon, authenticated;\n` +
+          `CREATE POLICY "Anyone can submit application" ON public.applications FOR INSERT TO anon, authenticated WITH CHECK (true);\n` +
+          `CREATE POLICY "Anyone can view applications" ON public.applications FOR SELECT TO anon, authenticated USING (true);\n` +
+          `GRANT SELECT ON public.applications_summary TO anon, authenticated;`,
+          'color: #3b82f6; font-size: 12px;'
+        );
+
         saveApplicationLocally(formData, referenceCode, planName);
         return {
           success: true,
           referenceCode,
-          error: error.message,
+          error: insertResult.error.message,
           source: 'local',
         };
       }
 
+      console.info(
+        `%c[Supabase Success] Application saved to Supabase! Ref: ${referenceCode}`,
+        'color: #10b981; font-weight: bold;'
+      );
+
       return {
         success: true,
         referenceCode,
-        id: data?.id,
         source: 'supabase',
       };
     } catch (err: any) {

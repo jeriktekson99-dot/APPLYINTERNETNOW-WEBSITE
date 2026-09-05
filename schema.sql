@@ -63,6 +63,9 @@ CREATE TABLE IF NOT EXISTS public.applications (
     updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- Ensure cavite_location column exists if updating an existing schema
+ALTER TABLE public.applications ADD COLUMN IF NOT EXISTS cavite_location TEXT;
+
 -- Comment on table & columns
 COMMENT ON TABLE public.applications IS 'Customer lead and installation applications submitted through the landing page';
 COMMENT ON COLUMN public.applications.reference_code IS 'Unique human-readable reference ticket code';
@@ -99,9 +102,14 @@ CREATE INDEX IF NOT EXISTS idx_applications_created_at ON public.applications(cr
 CREATE INDEX IF NOT EXISTS idx_applications_reference_code ON public.applications(reference_code);
 
 -- ==============================================================================
--- 5. ROW LEVEL SECURITY (RLS) POLICIES
+-- 5. ROW LEVEL SECURITY (RLS) POLICIES & PERMISSIONS
 -- ==============================================================================
--- Enable RLS on both tables
+-- Ensure schema usage and table grants for anon and authenticated roles
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+GRANT ALL ON TABLE public.plans TO anon, authenticated;
+GRANT ALL ON TABLE public.applications TO anon, authenticated;
+
+-- Enable RLS on tables
 ALTER TABLE public.plans ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.applications ENABLE ROW LEVEL SECURITY;
 
@@ -109,19 +117,23 @@ ALTER TABLE public.applications ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Public can view plans" ON public.plans;
 CREATE POLICY "Public can view plans"
 ON public.plans FOR SELECT
+TO anon, authenticated
 USING (true);
 
 -- Applications Policies:
--- 1. Anyone (anonymous visitors) can submit a new application
+-- 1. Anyone (public visitors / anon key) can submit a new application
 DROP POLICY IF EXISTS "Anyone can submit application" ON public.applications;
 CREATE POLICY "Anyone can submit application"
 ON public.applications FOR INSERT
+TO anon, authenticated
 WITH CHECK (true);
 
--- 2. Anyone can read their own application status using their reference code and email
+-- 2. Anyone can read their application data / view applications
 DROP POLICY IF EXISTS "Public can track application by reference code" ON public.applications;
-CREATE POLICY "Public can track application by reference code"
+DROP POLICY IF EXISTS "Anyone can view applications" ON public.applications;
+CREATE POLICY "Anyone can view applications"
 ON public.applications FOR SELECT
+TO anon, authenticated
 USING (true);
 
 -- ==============================================================================
@@ -147,15 +159,20 @@ ON CONFLICT (id) DO UPDATE SET
     installation_fee = EXCLUDED.installation_fee;
 
 -- ==============================================================================
--- 7. HELPER VIEW FOR DASHBOARD REPORTING (Optional)
+-- 7. HELPER VIEW FOR DASHBOARD REPORTING (applications_summary)
 -- ==============================================================================
-CREATE OR REPLACE VIEW public.applications_summary AS
+-- Note: In Postgres 15+, views can query tables with RLS.
+-- This view consolidates customer applications with plan specifications.
+CREATE OR REPLACE VIEW public.applications_summary 
+WITH (security_invoker = false) -- Runs with creator privileges so summary is readable
+AS
 SELECT 
     a.id,
     a.reference_code,
     a.full_name,
     a.email,
     a.phone,
+    a.cavite_location,
     a.address,
     a.plan_name,
     a.service_type,
@@ -166,3 +183,6 @@ SELECT
 FROM public.applications a
 LEFT JOIN public.plans p ON a.plan_id = p.id
 ORDER BY a.created_at DESC;
+
+-- Grant access on the view to public/anon roles
+GRANT SELECT ON public.applications_summary TO anon, authenticated;
