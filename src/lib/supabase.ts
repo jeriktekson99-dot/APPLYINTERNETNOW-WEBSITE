@@ -87,7 +87,10 @@ export async function submitLeadApplication(
             full_name: formData.fullName.trim(),
             email: formData.email.trim().toLowerCase(),
             phone: formData.mobileNumber.trim(),
-            address: formData.installationAddress.trim(),
+            cavite_location: formData.caviteLocation || null,
+            address: formData.caviteLocation 
+              ? `${formData.installationAddress.trim()} (${formData.caviteLocation}, Cavite)`
+              : formData.installationAddress.trim(),
             status: 'pending',
             promo_code: formData.promoCode || null,
           },
@@ -150,6 +153,7 @@ function saveApplicationLocally(formData: LeadFormData, referenceCode: string, p
       full_name: formData.fullName,
       email: formData.email,
       phone: formData.mobileNumber,
+      cavite_location: formData.caviteLocation || null,
       address: formData.installationAddress,
       status: 'pending',
       created_at: new Date().toISOString(),

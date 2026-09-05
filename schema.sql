@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS public.applications (
     full_name TEXT NOT NULL,                   -- Customer's full name
     email TEXT NOT NULL,                       -- Contact email
     phone TEXT NOT NULL,                       -- Contact mobile/phone number
+    cavite_location TEXT,                      -- City or municipality in Cavite (e.g. 'Bacoor City', 'Imus City')
     address TEXT NOT NULL,                     -- Complete installation address
     
     -- Application Lifecycle Status

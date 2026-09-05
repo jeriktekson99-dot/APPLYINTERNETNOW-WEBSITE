@@ -256,3 +256,37 @@ export const PARTNER_BRANDS: PartnerBrand[] = [
   { name: 'Disney+', category: 'Entertainment', accentColor: '#113CCF' },
   { name: 'Steam', category: 'Gaming CDN', accentColor: '#171A21' },
 ];
+
+export interface CaviteLocationOption {
+  value: string;
+  label: string;
+  isOutside?: boolean;
+}
+
+export const CAVITE_LOCATIONS: CaviteLocationOption[] = [
+  { value: 'Bacoor City', label: 'Bacoor City' },
+  { value: 'Cavite City', label: 'Cavite City' },
+  { value: 'Dasmariñas City', label: 'Dasmariñas City' },
+  { value: 'General Trias City', label: 'General Trias City' },
+  { value: 'Imus City', label: 'Imus City' },
+  { value: 'Tagaytay City', label: 'Tagaytay City' },
+  { value: 'Trece Martires City', label: 'Trece Martires City' },
+  { value: 'Carmona City', label: 'Carmona City' },
+  { value: 'Alfonso', label: 'Alfonso' },
+  { value: 'Amadeo', label: 'Amadeo' },
+  { value: 'General Emilio Aguinaldo (Bailen)', label: 'General Emilio Aguinaldo (Bailen)' },
+  { value: 'General Mariano Alvarez (GMA)', label: 'General Mariano Alvarez (GMA)' },
+  { value: 'Indang', label: 'Indang' },
+  { value: 'Kawit', label: 'Kawit' },
+  { value: 'Magallanes', label: 'Magallanes' },
+  { value: 'Maragondon', label: 'Maragondon' },
+  { value: 'Mendez', label: 'Mendez' },
+  { value: 'Naic', label: 'Naic' },
+  { value: 'Noveleta', label: 'Noveleta' },
+  { value: 'Rosario', label: 'Rosario' },
+  { value: 'Silang', label: 'Silang' },
+  { value: 'Tanza', label: 'Tanza' },
+  { value: 'Ternate', label: 'Ternate' },
+  { value: 'Others', label: 'Others (Outside Cavite)', isOutside: true },
+];
+

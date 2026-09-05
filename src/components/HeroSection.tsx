@@ -10,10 +10,12 @@ import {
   ChevronDown,
   Check,
   Home,
-  RotateCcw
+  RotateCcw,
+  AlertTriangle
 } from 'lucide-react';
 import { LeadFormData } from '../types';
 import { submitLeadApplication } from '../lib/supabase';
+import { CAVITE_LOCATIONS } from '../data/ispData';
 import familyLifestyleImg from '../assets/images/family_smart_tech_1787070015425.jpg';
 
 interface HeroSectionProps {
@@ -38,6 +40,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     installationAddress: '',
     selectedPlanId: selectedPlanId || 'plan-1500',
     serviceType: 'home',
+    caviteLocation: '',
   });
 
   React.useEffect(() => {
@@ -85,6 +88,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     if (!formData.fullName.trim()) errors.fullName = 'Full name is required';
     if (!formData.email.trim() || !formData.email.includes('@')) errors.email = 'Valid email is required';
     if (!formData.mobileNumber.trim()) errors.mobileNumber = 'Phone number is required';
+    if (!formData.caviteLocation) {
+      errors.caviteLocation = 'Please select your location in Cavite';
+    } else if (formData.caviteLocation === 'Others') {
+      errors.caviteLocation = 'We only serve regions in Cavite at this time.';
+    }
     if (!formData.installationAddress.trim()) errors.installationAddress = 'Installation address is required';
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -117,6 +125,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       installationAddress: '',
       selectedPlanId: selectedPlanId || 'plan-1500',
       serviceType: 'home',
+      caviteLocation: '',
     });
     setFormErrors({});
     setIsSubmitted(false);
@@ -130,6 +139,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       installationAddress: '',
       selectedPlanId: selectedPlanId || 'plan-1500',
       serviceType: 'home',
+      caviteLocation: '',
     });
     setFormErrors({});
     setIsSubmitted(false);
@@ -271,7 +281,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
                   {/* Subtitle */}
                   <p className="text-purple-200/90 text-sm sm:text-base max-w-md mx-auto leading-relaxed mb-6">
-                    Your FiberX internet application has been registered. Our deployment team is reviewing port availability at your location.
+                    Your FiberX internet application has been registered. Our deployment team is reviewing optical port availability in {formData.caviteLocation ? `${formData.caviteLocation}, Cavite` : 'your area'}.
                   </p>
 
                   {/* Actions Block directly below description with no divider line */}
@@ -338,34 +348,35 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                       </div>
                     </div>
 
-                    {/* 2. Full Name */}
-                    <div>
-                      <label htmlFor="hero-full-name" className="block text-xs font-bold uppercase tracking-wider text-purple-200 mb-1.5">
-                        Full Name <span className="text-[#00F0FF]">*</span>
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-purple-300">
-                          <User className="w-4 h-4" />
-                        </div>
-                        <input
-                          type="text"
-                          id="hero-full-name"
-                          name="fullName"
-                          placeholder="e.g. Juan dela Cruz"
-                          value={formData.fullName}
-                          onChange={handleInputChange}
-                          className={`w-full pl-10 pr-3.5 py-2.5 bg-black/35 border rounded-xl text-sm text-white placeholder:text-purple-300/50 font-medium focus:outline-none focus:ring-2 transition-all ${
-                            formErrors.fullName ? 'border-rose-400 focus:ring-rose-400/30' : 'border-white/15 focus:border-blue-400 focus:ring-blue-500/30'
-                          }`}
-                        />
-                      </div>
-                      {formErrors.fullName && (
-                        <p className="text-[11px] text-rose-300 font-medium mt-1">{formErrors.fullName}</p>
-                      )}
-                    </div>
-
-                    {/* 3 & 4. Email and Phone */}
+                    {/* 2x2 Grid: Full Name, Email, Phone, and Location in Cavite */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                      {/* 1. Full Name */}
+                      <div>
+                        <label htmlFor="hero-full-name" className="block text-xs font-bold uppercase tracking-wider text-purple-200 mb-1.5">
+                          Full Name <span className="text-[#00F0FF]">*</span>
+                        </label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-purple-300">
+                            <User className="w-4 h-4" />
+                          </div>
+                          <input
+                            type="text"
+                            id="hero-full-name"
+                            name="fullName"
+                            placeholder="Juan dela Cruz"
+                            value={formData.fullName}
+                            onChange={handleInputChange}
+                            className={`w-full pl-10 pr-3.5 py-2.5 bg-black/35 border rounded-xl text-sm text-white placeholder:text-purple-300/50 font-medium focus:outline-none focus:ring-2 transition-all ${
+                              formErrors.fullName ? 'border-rose-400 focus:ring-rose-400/30' : 'border-white/15 focus:border-blue-400 focus:ring-blue-500/30'
+                            }`}
+                          />
+                        </div>
+                        {formErrors.fullName && (
+                          <p className="text-[11px] text-rose-300 font-medium mt-1">{formErrors.fullName}</p>
+                        )}
+                      </div>
+
+                      {/* 2. Email */}
                       <div>
                         <label htmlFor="hero-email" className="block text-xs font-bold uppercase tracking-wider text-purple-200 mb-1.5">
                           Email <span className="text-[#00F0FF]">*</span>
@@ -391,6 +402,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                         )}
                       </div>
 
+                      {/* 3. Phone */}
                       <div>
                         <label htmlFor="hero-phone" className="block text-xs font-bold uppercase tracking-wider text-purple-200 mb-1.5">
                           Phone <span className="text-[#00F0FF]">*</span>
@@ -415,12 +427,63 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                           <p className="text-[11px] text-rose-300 font-medium mt-1">{formErrors.mobileNumber}</p>
                         )}
                       </div>
+
+                      {/* 4. Location in Cavite (Dropdown) */}
+                      <div>
+                        <label htmlFor="hero-cavite-location" className="block text-xs font-bold uppercase tracking-wider text-purple-200 mb-1.5">
+                          Location in Cavite <span className="text-[#00F0FF]">*</span>
+                        </label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-purple-300">
+                            <MapPin className="w-4 h-4" />
+                          </div>
+                          <select
+                            id="hero-cavite-location"
+                            name="caviteLocation"
+                            value={formData.caviteLocation}
+                            onChange={handleInputChange}
+                            className={`w-full pl-10 pr-9 py-2.5 bg-black/35 border rounded-xl text-sm font-medium focus:outline-none focus:ring-2 transition-all appearance-none cursor-pointer ${
+                              formData.caviteLocation ? 'text-white' : 'text-purple-300/50'
+                            } ${
+                              formErrors.caviteLocation ? 'border-rose-400 focus:ring-rose-400/30' : 'border-white/15 focus:border-blue-400 focus:ring-blue-500/30'
+                            }`}
+                          >
+                            <option value="" className="bg-[#170933] text-purple-300/50">
+                              -- Select Cavite Area --
+                            </option>
+                            {CAVITE_LOCATIONS.map((loc) => (
+                              <option key={loc.value} value={loc.value} className="bg-[#170933] text-white">
+                                {loc.label}
+                              </option>
+                            ))}
+                          </select>
+                          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-purple-300">
+                            <ChevronDown className="w-4 h-4" />
+                          </div>
+                        </div>
+                        {formErrors.caviteLocation && (
+                          <p className="text-[11px] text-rose-300 font-medium mt-1">{formErrors.caviteLocation}</p>
+                        )}
+                      </div>
+
+                      {/* Notice if 'Others' (outside Cavite) is selected */}
+                      {formData.caviteLocation === 'Others' && (
+                        <div className="col-span-1 sm:col-span-2 p-3 rounded-xl bg-amber-500/15 border border-amber-400/40 text-amber-200 text-xs flex items-start gap-2.5 animate-in fade-in duration-200">
+                          <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                          <div>
+                            <p className="font-bold text-amber-300 mb-0.5">Service Coverage Restriction</p>
+                            <p className="text-amber-200/90 leading-relaxed">
+                              FiberX services are exclusively available in Cavite province. We currently only serve regions within Cavite.
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
-                    {/* 5. Address */}
+                    {/* 5. Address (Street & Barangay) */}
                     <div>
                       <label htmlFor="hero-address" className="block text-xs font-bold uppercase tracking-wider text-purple-200 mb-1.5">
-                        Address <span className="text-[#00F0FF]">*</span>
+                        Installation Address <span className="text-[#00F0FF]">*</span>
                       </label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-purple-300">
@@ -430,7 +493,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                           type="text"
                           id="hero-address"
                           name="installationAddress"
-                          placeholder="Unit 14B, Tower 2, Bonifacio Global City, Taguig"
+                          placeholder="House/Unit No., Street, Subdivision, Barangay"
                           value={formData.installationAddress}
                           onChange={handleInputChange}
                           className={`w-full pl-10 pr-3.5 py-2.5 bg-black/35 border rounded-xl text-sm text-white placeholder:text-purple-300/50 font-medium focus:outline-none focus:ring-2 transition-all ${
@@ -447,14 +510,20 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                     <button
                       type="submit"
                       id="hero-form-submit-btn"
-                      disabled={isSubmitting}
-                      className="w-full mt-2 bg-[#2A4BFF] hover:bg-[#1E3BB8] active:scale-[0.99] text-white font-extrabold text-base py-3.5 px-6 rounded-xl shadow-md hover:shadow-lg shadow-black/20 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75"
+                      disabled={isSubmitting || formData.caviteLocation === 'Others'}
+                      className={`w-full mt-2 text-white font-extrabold text-base py-3.5 px-6 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer ${
+                        formData.caviteLocation === 'Others'
+                          ? 'bg-slate-700/60 text-slate-300 cursor-not-allowed border border-white/10'
+                          : 'bg-[#2A4BFF] hover:bg-[#1E3BB8] active:scale-[0.99] hover:shadow-lg shadow-black/20 disabled:opacity-75'
+                      }`}
                     >
                       {isSubmitting ? (
                         <span className="flex items-center gap-2">
                           <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                           <span>Processing Application...</span>
                         </span>
+                      ) : formData.caviteLocation === 'Others' ? (
+                        <span>Cavite Regions Only</span>
                       ) : (
                         <>
                           <span>Apply Now</span>

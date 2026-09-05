@@ -31,6 +31,7 @@ export interface LeadFormData {
   installationAddress: string;
   selectedPlanId: string;
   serviceType: 'home' | 'business';
+  caviteLocation?: string;
   promoCode?: string;
   ticketNumber?: string;
 }
