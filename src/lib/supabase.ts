@@ -129,11 +129,13 @@ export async function submitLeadApplication(
           `1. Open Supabase Dashboard -> SQL Editor\n` +
           `2. Paste and Run the following SQL:\n\n` +
           `ALTER TABLE public.applications ENABLE ROW LEVEL SECURITY;\n` +
-          `GRANT USAGE ON SCHEMA public TO anon, authenticated;\n` +
-          `GRANT ALL ON TABLE public.applications TO anon, authenticated;\n` +
+          `GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;\n` +
+          `GRANT ALL ON TABLE public.applications TO anon, authenticated, service_role;\n` +
           `CREATE POLICY "Anyone can submit application" ON public.applications FOR INSERT TO anon, authenticated WITH CHECK (true);\n` +
           `CREATE POLICY "Anyone can view applications" ON public.applications FOR SELECT TO anon, authenticated USING (true);\n` +
-          `GRANT SELECT ON public.applications_summary TO anon, authenticated;`,
+          `DROP VIEW IF EXISTS public.applications_summary CASCADE;\n` +
+          `CREATE OR REPLACE VIEW public.applications_summary WITH (security_invoker = false) AS SELECT a.id, a.reference_code, a.full_name, a.email, a.phone, a.address, a.plan_name, a.service_type, a.status, p.speed_mbps, p.price_php, a.created_at, a.cavite_location FROM public.applications a LEFT JOIN public.plans p ON a.plan_id = p.id ORDER BY a.created_at DESC;\n` +
+          `GRANT SELECT ON public.applications_summary TO anon, authenticated, service_role;`,
           'color: #3b82f6; font-size: 12px;'
         );
 

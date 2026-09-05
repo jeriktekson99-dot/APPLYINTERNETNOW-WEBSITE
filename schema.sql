@@ -159,13 +159,16 @@ ON CONFLICT (id) DO UPDATE SET
     installation_fee = EXCLUDED.installation_fee;
 
 -- ==============================================================================
--- 7. HELPER VIEW FOR DASHBOARD REPORTING (applications_summary)
+-- 7. UNRESTRICTED VIEW FOR DASHBOARD REPORTING (applications_summary)
 -- ==============================================================================
--- Note: In Postgres, replacing an existing view with different column positions requires DROP VIEW first.
+-- 1) Drop view first to avoid any column reordering conflict (Error 42P16)
 DROP VIEW IF EXISTS public.applications_summary CASCADE;
 
-CREATE VIEW public.applications_summary 
-WITH (security_invoker = false) -- Runs with creator privileges so summary is readable
+-- 2) Recreate view with security_invoker = false.
+-- This ensures the view executes with the owner's (postgres) privileges,
+-- completely bypassing Row Level Security (RLS) on the underlying tables.
+CREATE OR REPLACE VIEW public.applications_summary 
+WITH (security_invoker = false)
 AS
 SELECT 
     a.id,
@@ -173,17 +176,17 @@ SELECT
     a.full_name,
     a.email,
     a.phone,
-    a.cavite_location,
     a.address,
     a.plan_name,
     a.service_type,
     a.status,
     p.speed_mbps,
     p.price_php,
-    a.created_at
+    a.created_at,
+    a.cavite_location
 FROM public.applications a
 LEFT JOIN public.plans p ON a.plan_id = p.id
 ORDER BY a.created_at DESC;
 
--- Grant access on the view to public/anon roles
-GRANT SELECT ON public.applications_summary TO anon, authenticated;
+-- 3) Grant unrestricted SELECT permission to all roles (anon, authenticated, service_role)
+GRANT SELECT ON public.applications_summary TO anon, authenticated, service_role;
